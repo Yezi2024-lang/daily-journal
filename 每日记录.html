@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="每日记录">
+<meta name="theme-color" content="#f5f0eb">
+<meta name="description" content="每天记录高兴的事、不高兴的事、思考和自我评分">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgY29sb3I9IiNlODk1NmEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIGNvbG9yPSIjZDE3NDNmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3QgeD0iMjIiIHk9IjE0IiB3aWR0aD0iMTM2IiBoZWlnaHQ9IjE1MiIgcng9IjIwIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iMTMyIiBjeT0iMTMyIiByPSIyMCIgZmlsbD0iI2YwYjg0MCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxMzIiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiI+4piEPC90ZXh0Pjwvc3ZnPg==">
+<title>每日记录</title>
+<style>
+  :root {
+    --bg: #f5f0eb;
+    --card: #ffffff;
+    --text: #2c2416;
+    --text2: #8a8175;
+    --text3: #b5ada2;
+    --border: #e8e0d5;
+    --accent: #e8956a;
+    --accent2: #d4784a;
+    --shadow: 0 1px 3px rgba(44,36,22,.04), 0 4px 12px rgba(44,36,22,.05);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --tb-height: calc(56px + var(--safe-bottom));
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { height:100%; overflow:hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 允许在输入框中选择文本 */
+  textarea { -webkit-user-select: text; user-select: text; }
+
+  /* ════════════════════════ 顶部日期栏 ════════════════════════ */
+  .date-bar {
+    flex-shrink: 0;
+    padding: calc(12px + var(--safe-top)) 20px 12px;
+    text-align: center;
+    background: var(--bg);
+    position: relative;
+    z-index: 10;
+  }
+  .date-bar .weekday { font-size: 15px; color: var(--text2); margin-bottom: 2px; letter-spacing:.3px; }
+  .date-bar .date { font-size: 26px; font-weight: 700; letter-spacing:.5px; }
+  .date-bar .hint { font-size: 12px; color: var(--text3); margin-top: 2px; min-height: 18px; }
+  .date-bar .nav-hint {
+    font-size: 11px; color: var(--text3); margin-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    opacity: 0.6;
+  }
+  .date-bar .nav-hint svg { width: 14px; height: 14px; }
+
+  /* ════════════════════════ 可滚动内容区 ════════════════════════ */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 16px 16px;
+    /* 触摸滑动检测区域 */
+    touch-action: pan-y;
+  }
+
+  /* ════════════════════════ 卡片 ════════════════════════ */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-head .ico {
+    width: 40px; height: 40px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .ico-happy   { background: #fef6ee; }
+  .ico-unhappy { background: #eef4f7; }
+  .ico-think   { background: #f3f2f9; }
+  .ico-rate    { background: #fdf7ec; }
+
+  .card-head .lbl {
+    font-weight: 700; font-size: 16px; letter-spacing: .2px;
+  }
+  .card-head .sub {
+    font-size: 12px; color: var(--text2); font-weight: 400; margin-top: 1px;
+  }
+
+  .card textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    line-height: 1.65;
+    resize: none;
+    min-height: 88px;
+    background: #fdfdfc;
+    color: var(--text);
+    transition: border-color .2s;
+  }
+  .card textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,149,106,.12);
+  }
+  .card textarea::placeholder { color: #c7c0b6; font-size: 15px; }
+
+  /* ════════════════════════ 评分 ════════════════════════ */
+  .rate-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+  }
+  .star-btn {
+    width: 30px; height: 44px;
+    border: none; background: none;
+    font-size: 28px; cursor: pointer;
+    color: #e8e0d3;
+    transition: transform .12s ease, color .12s ease;
+    padding: 0;
+    line-height: 44px;
+    text-align: center;
+  }
+  .star-btn:active { transform: scale(1.25); }
+  .star-btn.on { color: #f2b830; }
+
+  .rate-num {
+    font-size: 44px; font-weight: 800;
+    color: var(--text3);
+    min-width: 56px; text-align: center;
+    transition: color .2s;
+  }
+  .rate-num.scored { color: #c69c35; }
+  .rate-label {
+    font-size: 13px; color: var(--text3);
+    min-width: 44px; text-align: center;
+  }
+
+  /* ════════════════════════ Toast ════════════════════════ */
+  .toast {
+    position: fixed; top: calc(16px + var(--safe-top)); left: 50%;
+    transform: translateX(-50%);
+    background: #2c2416; color: #fff;
+    padding: 10px 22px; border-radius: 22px;
+    font-size: 14px; font-weight: 600;
+    z-index: 999; pointer-events: none;
+    animation: toastIn .35s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  }
+  .toast.out { animation: toastOut .3s ease forwards; }
+  @keyframes toastIn  { from { opacity:0; transform:translateX(-50%) translateY(-16px); } }
+  @keyframes toastOut { to   { opacity:0; transform:translateX(-50%) translateY(-8px); } }
+
+  /* ════════════════════════ 底部工具栏 ════════════════════════ */
+  .bottom-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: var(--tb-height);
+    padding-bottom: var(--safe-bottom);
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -1px 4px rgba(0,0,0,.03);
+    z-index: 20;
+    gap: 4px;
+  }
+  .bbar-btn {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 56px; border: none; background: none;
+    font-family: inherit; color: var(--text2);
+    font-size: 11px; cursor: pointer;
+    gap: 4px; transition: color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bbar-btn:active { color: var(--accent); }
+  .bbar-btn svg { width: 22px; height: 22px; }
+  .bbar-btn .bbar-icon { font-size: 20px; line-height: 1; }
+
+  /* ════════════════════════ 浮动保存按钮 ════════════════════════ */
+  .fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(var(--tb-height) + 20px);
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(232,149,106,.35);
+    z-index: 30;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s, box-shadow .2s, background .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fab:active { transform: scale(.92); box-shadow: 0 2px 8px rgba(232,149,106,.25); }
+  .fab.saved { background: #5aab61; box-shadow: 0 4px 16px rgba(90,171,97,.35); }
+
+  /* ════════════════════════ 遮罩 ════════════════════════ */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0,0,0,.35);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  /* ════════════════════════ 底部面板 (日历 / 菜单) ════════════════════════ */
+  .sheet {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 60;
+    background: var(--card);
+    border-radius: 22px 22px 0 0;
+    max-height: 82vh;
+    padding: 8px 0 calc(16px + var(--safe-bottom));
+    box-shadow: 0 -4px 24px rgba(0,0,0,.1);
+    transform: translateY(100%);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 36px; height: 5px;
+    border-radius: 3px; background: #d5cdc2;
+    margin: 0 auto 12px; flex-shrink: 0;
+  }
+  .sheet-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 20px; }
+  .sheet-title {
+    font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 16px;
+  }
+
+  /* ════════════════════════ 面板内日历 ════════════════════════ */
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .cal-month { font-weight: 700; font-size: 16px; }
+  .cal-nav {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--card); font-size: 15px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .cal-wdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    text-align: center; font-size: 12px; color: var(--text2);
+    margin-bottom: 6px; font-weight: 600;
+  }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; border-radius: 10px; cursor: pointer;
+    transition: all .15s; position: relative; font-weight: 500;
+  }
+  .cal-day:active { background: #f5f0eb; }
+  .cal-day.today { color: var(--accent); font-weight: 800; background: #fef8f4; }
+  .cal-day.sel { background: var(--accent); color: #fff; font-weight: 700; }
+  .cal-day.sel.today { background: var(--accent); color: #fff; }
+  .cal-day.other { color: #d5cdc2; pointer-events: none; }
+  .cal-day.dot::after {
+    content: ''; position: absolute; bottom: 4px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  }
+  .cal-day.sel.dot::after { background: #fff; }
+
+  /* ════════════════════════ 面板内历史列表 ════════════════════════ */
+  .hist-title {
+    font-size: 13px; font-weight: 700; color: var(--text2);
+    margin: 20px 0 10px; letter-spacing: .3px;
+  }
+  .hist-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: background .15s; font-size: 15px;
+  }
+  .hist-item:active { background: #faf7f3; }
+  .hist-item.active { background: #fef8f4; }
+  .hist-date { font-weight: 600; }
+  .hist-score { font-weight: 700; color: #c69c35; font-size: 16px; }
+
+  /* ════════════════════════ 面板内按钮 ════════════════════════ */
+  .sheet-btn {
+    display: block; width: 100%; padding: 14px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--card); font-size: 16px;
+    font-family: inherit; color: var(--text); cursor: pointer;
+    margin-bottom: 10px; text-align: left; transition: background .15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sheet-btn:active { background: #faf7f3; }
+  .sheet-btn .sico { font-size: 20px; }
+  .sheet-btn.danger { color: #d44; border-color: #fcc; }
+  .sheet-btn.danger:active { background: #fff5f5; }
+
+  /* ════════════════════════ 空状态 ════════════════════════ */
+  .empty { text-align: center; padding: 28px 16px; color: var(--text3); }
+  .empty .eicon { font-size: 40px; margin-bottom: 8px; }
+
+  /* ════════════════════════ 大屏适配 ════════════════════════ */
+  @media (min-width: 640px) {
+    .scroll-area { max-width: 520px; margin: 0 auto; }
+    .date-bar { max-width: 520px; margin: 0 auto; width: 100%; }
+    .fab { right: calc(50% - 240px); }
+    .bottom-bar { max-width: 520px; margin: 0 auto; width: 100%; border-radius: 22px 22px 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ 顶部日期 ═══════════════ -->
+<div class="date-bar" id="dateBar">
+  <div class="weekday" id="weekdayDisplay"></div>
+  <div class="date" id="dateDisplay"></div>
+  <div class="hint" id="hintDisplay"></div>
+  <div class="nav-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    左右滑动切换日期
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </div>
+</div>
+
+<!-- ═══════════════ 可滚动卡片区 ═══════════════ -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- 高兴 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-happy">😊</div>
+      <div><div class="lbl">今天高兴的事情</div><div class="sub">记录让你嘴角上扬的瞬间</div></div>
+    </div>
+    <textarea id="happyInput" placeholder="写下今天让你感到开心、温暖、满足的事情…"></textarea>
+  </div>
+
+  <!-- 不高兴 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-unhappy">😞</div>
+      <div><div class="lbl">今天最不高兴的事情</div><div class="sub">写出来，也是一种释放</div></div>
+    </div>
+    <textarea id="unhappyInput" placeholder="今天有什么让你沮丧、生气或难过的事…"></textarea>
+  </div>
+
+  <!-- 思考 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-think">💭</div>
+      <div><div class="lbl">我的思考</div><div class="sub">今天的感悟、反思或收获</div></div>
+    </div>
+    <textarea id="thinkInput" placeholder="今天有什么新的想法、感悟或反思…"></textarea>
+  </div>
+
+  <!-- 评分 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-rate">⭐</div>
+      <div><div class="lbl">今日自我评分</div><div class="sub">给自己今天的表现打个分（1-10）</div></div>
+    </div>
+    <div class="rate-row">
+      <div class="stars" id="starRating" style="display:flex;gap:2px;"></div>
+    </div>
+    <div class="rate-row" style="margin-top:4px;">
+      <span class="rate-num" id="ratingNumber">0</span>
+      <span class="rate-label" id="ratingLabel">点击评分</span>
+    </div>
+  </div>
+
+  <!-- 底部留白 -->
+  <div style="height:80px;"></div>
+</div>
+
+<!-- ═══════════════ 浮动保存按钮 ═══════════════ -->
+<button class="fab" id="fabBtn" onclick="manualSave()" aria-label="保存">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+</button>
+
+<!-- ═══════════════ 底部工具栏 ═══════════════ -->
+<div class="bottom-bar">
+  <button class="bbar-btn" onclick="goPrevDay()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    <span>前一天</span>
+  </button>
+  <button class="bbar-btn" onclick="openCalendar()">
+    <span class="bbar-icon">📅</span>
+    <span>日历</span>
+  </button>
+  <button class="bbar-btn" onclick="goToToday()">
+    <span class="bbar-icon">📍</span>
+    <span>今天</span>
+  </button>
+  <button class="bbar-btn" onclick="goNextDay()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    <span>后一天</span>
+  </button>
+  <button class="bbar-btn" onclick="openMenu()">
+    <span class="bbar-icon">⋯</span>
+    <span>更多</span>
+  </button>
+</div>
+
+<!-- ═══════════════ 遮罩 ═══════════════ -->
+<div class="overlay" id="overlay" onclick="closeAllSheets()"></div>
+
+<!-- ═══════════════ 日历面板 ═══════════════ -->
+<div class="sheet" id="calendarSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">📅 选择日期</div>
+  <div class="sheet-body">
+    <div class="cal-header">
+      <span class="cal-month" id="calMonthLabel"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="cal-nav" onclick="calChangeMonth(-1)">◀</button>
+        <button class="cal-nav" onclick="calChangeMonth(1)">▶</button>
+      </div>
+    </div>
+    <div class="cal-wdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <button class="sheet-btn" onclick="goToToday();closeAllSheets();" style="margin-top:14px;justify-content:center;">📍 回到今天</button>
+    <div class="hist-title">📋 最近记录</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ 菜单面板 ═══════════════ -->
+<div class="sheet" id="menuSheet" style="max-height:50vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">⚙️ 更多操作</div>
+  <div class="sheet-body">
+    <button class="sheet-btn" onclick="exportData()"><span class="sico">📥</span> 导出数据备份</button>
+    <button class="sheet-btn" onclick="document.getElementById('importFile').click()"><span class="sico">📤</span> 导入数据恢复</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="sheet-btn" onclick="clearTodayViaMenu()"><span class="sico">🗑</span> 清空当日记录</button>
+    <div style="text-align:center;font-size:12px;color:var(--text3);padding:14px 0;">
+      数据存储在浏览器本地<br>建议定期导出备份
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// 数据层
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'daily_journal_entries';
+
+function loadAll() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveAll(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+function getEntry(ds) { return loadAll()[ds] || null; }
+function setEntry(ds, entry) {
+  const data = loadAll();
+  if (entry === null) delete data[ds];
+  else data[ds] = entry;
+  saveAll(data);
+}
+
+// ═══════════════════════════════════════════
+// 状态
+// ═══════════════════════════════════════════
+let selectedDate = todayStr();
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let currentRating = 0;
+let fabTimeout = null;
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function isToday(ds) { return ds === todayStr(); }
+
+// ═══════════════════════════════════════════
+// 渲染引擎
+// ═══════════════════════════════════════════
+function renderAll() {
+  loadEntryToForm(selectedDate);
+  renderCalSheet();
+  renderHistList();
+  updateDateBar();
+}
+
+function updateDateBar() {
+  const d = new Date(selectedDate + 'T00:00:00');
+  const wd = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  const today = todayStr();
+  const yday = new Date(Date.now()-864e5);
+  const ydayStr = `${yday.getFullYear()}-${String(yday.getMonth()+1).padStart(2,'0')}-${String(yday.getDate()).padStart(2,'0')}`;
+
+  document.getElementById('weekdayDisplay').textContent = wd[d.getDay()];
+  document.getElementById('dateDisplay').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+
+  let h = '';
+  if (selectedDate === today) h = '📌 今天';
+  else if (selectedDate === ydayStr) h = '📌 昨天';
+  else if (selectedDate > today) h = '🔒 未来日期 · 只读';
+  document.getElementById('hintDisplay').textContent = h;
+}
+
+function loadEntryToForm(ds) {
+  const e = getEntry(ds);
+  document.getElementById('happyInput').value = e?.happy || '';
+  document.getElementById('unhappyInput').value = e?.unhappy || '';
+  document.getElementById('thinkInput').value = e?.think || '';
+  currentRating = e?.rating || 0;
+  renderStars();
+  updateDateBar();
+
+  const ro = ds > todayStr();
+  ['happyInput','unhappyInput','thinkInput'].forEach(id => {
+    const el = document.getElementById(id);
+    el.readOnly = ro;
+    el.style.background = ro ? '#f9f8f6' : '#fdfdfc';
+    el.style.color = ro ? '#a0988c' : 'var(--text)';
+  });
+}
+
+// ═══════════════════════════════════════════
+// 评分星星
+// ═══════════════════════════════════════════
+const rateLabels = ['','很差','较差','一般','还行','中等','不错','挺好','很好','很棒','完美'];
+
+function renderStars() {
+  const container = document.getElementById('starRating');
+  const numEl = document.getElementById('ratingNumber');
+  const lblEl = document.getElementById('ratingLabel');
+  const ro = selectedDate > todayStr();
+
+  let h = '';
+  for (let i = 1; i <= 10; i++) {
+    h += `<button class="star-btn${i <= currentRating ? ' on' : ''}" ${ro ? 'disabled' : ''} onclick="setRating(${i})" aria-label="${i}分">★</button>`;
+  }
+  container.innerHTML = h;
+  numEl.textContent = currentRating || '0';
+  numEl.className = 'rate-num' + (currentRating > 0 ? ' scored' : '');
+  lblEl.textContent = currentRating > 0 ? rateLabels[currentRating] : (ro ? '' : '点击评分');
+}
+
+function setRating(v) {
+  if (selectedDate > todayStr()) return;
+  currentRating = v;
+  renderStars();
+  autoSave();
+  // 触觉反馈（如果支持）
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ═══════════════════════════════════════════
+// 保存
+// ═══════════════════════════════════════════
+let autoSaveTimer = null;
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => doSave(true), 600);
+}
+['happyInput','unhappyInput','thinkInput'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (selectedDate <= todayStr()) autoSave();
+  });
+});
+
+function manualSave() {
+  clearTimeout(autoSaveTimer);
+  doSave(false);
+}
+
+function doSave(silent) {
+  if (selectedDate > todayStr()) {
+    if (!silent) toast('不能编辑未来的日期');
+    return;
+  }
+  const entry = {
+    happy: document.getElementById('happyInput').value.trim(),
+    unhappy: document.getElementById('unhappyInput').value.trim(),
+    think: document.getElementById('thinkInput').value.trim(),
+    rating: currentRating,
+    updatedAt: new Date().toISOString()
+  };
+  setEntry(selectedDate, entry);
+  renderCalSheet();
+  renderHistList();
+
+  if (!silent) {
+    toast('✅ 已保存');
+    // FAB 变绿动画
+    const fab = document.getElementById('fabBtn');
+    fab.classList.add('saved');
+    clearTimeout(fabTimeout);
+    fabTimeout = setTimeout(() => fab.classList.remove('saved'), 1500);
+  }
+}
+
+// ═══════════════════════════════════════════
+// 日期导航
+// ═══════════════════════════════════════════
+function selectDate(ds) {
+  selectedDate = ds;
+  const d = new Date(ds + 'T00:00:00');
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+  renderAll();
+  closeAllSheets();
+}
+
+function goPrevDay() {
+  const d = new Date(selectedDate + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  selectDate(toStr(d));
+}
+function goNextDay() {
+  const d = new Date(selectedDate + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  selectDate(toStr(d));
+}
+function goToToday() {
+  selectDate(todayStr());
+  calMonth = new Date().getMonth();
+  calYear = new Date().getFullYear();
+}
+function toStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ═══════════════════════════════════════════
+// 滑动手势
+// ═══════════════════════════════════════════
+let touchStartX = 0, touchStartY = 0;
+const scrollArea = document.getElementById('scrollArea');
+
+scrollArea.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+scrollArea.addEventListener('touchend', (e) => {
+  const dx = (e.changedTouches[0]?.clientX || touchStartX) - touchStartX;
+  const dy = Math.abs((e.changedTouches[0]?.clientY || touchStartY) - touchStartY);
+  // 只在水平滑动超过 60px 且角度偏水平时触发
+  if (Math.abs(dx) > 60 && Math.abs(dx) > dy * 1.3) {
+    if (dx < 0) goNextDay();
+    else goPrevDay();
+  }
+});
+
+// ═══════════════════════════════════════════
+// 面板控制
+// ═══════════════════════════════════════════
+function openCalendar() {
+  calYear = new Date(selectedDate + 'T00:00:00').getFullYear();
+  calMonth = new Date(selectedDate + 'T00:00:00').getMonth();
+  renderCalSheet();
+  renderHistList();
+  showSheet('calendarSheet');
+}
+function openMenu() { showSheet('menuSheet'); }
+
+function showSheet(id) {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById(id).classList.add('open');
+}
+function closeAllSheets() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('calendarSheet').classList.remove('open');
+  document.getElementById('menuSheet').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════
+// 日历面板渲染
+// ═══════════════════════════════════════════
+function calChangeMonth(d) {
+  calMonth += d;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalSheet();
+}
+
+function renderCalSheet() {
+  document.getElementById('calMonthLabel').textContent = `${calYear}年 ${calMonth+1}月`;
+  const grid = document.getElementById('calGrid');
+  const entries = loadAll();
+  const fd = new Date(calYear, calMonth, 1).getDay();
+  const dim = new Date(calYear, calMonth+1, 0).getDate();
+  const pdim = new Date(calYear, calMonth, 0).getDate();
+  const today = todayStr();
+
+  let h = '';
+  for (let i = fd-1; i >= 0; i--) {
+    h += `<div class="cal-day other">${pdim - i}</div>`;
+  }
+  for (let d = 1; d <= dim; d++) {
+    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'cal-day';
+    if (ds === today) cls += ' today';
+    if (ds === selectedDate) cls += ' sel';
+    if (entries[ds]) cls += ' dot';
+    h += `<div class="${cls}" onclick="selectDate('${ds}')">${d}</div>`;
+  }
+  const rem = 7 - ((fd + dim) % 7);
+  if (rem < 7) for (let d=1; d<=rem; d++) h += `<div class="cal-day other">${d}</div>`;
+  grid.innerHTML = h;
+}
+
+function renderHistList() {
+  const container = document.getElementById('histList');
+  const entries = loadAll();
+  const dates = Object.keys(entries).sort().reverse();
+  if (!dates.length) {
+    container.innerHTML = '<div class="empty"><div class="eicon">📝</div>还没有记录</div>';
+    return;
+  }
+  let h = '';
+  for (const ds of dates.slice(0, 30)) {
+    const e = entries[ds];
+    const act = ds === selectedDate ? ' active' : '';
+    const d = new Date(ds + 'T00:00:00');
+    const label = `${d.getMonth()+1}/${d.getDate()} ${['日','一','二','三','四','五','六'][d.getDay()]}`;
+    const sc = e.rating > 0 ? `<span class="hist-score">${e.rating}分</span>` : '';
+    h += `<div class="hist-item${act}" onclick="selectDate('${ds}')"><span class="hist-date">${label}</span>${sc}</div>`;
+  }
+  container.innerHTML = h;
+}
+
+// ═══════════════════════════════════════════
+// 菜单操作
+// ═══════════════════════════════════════════
+function clearTodayViaMenu() {
+  if (!confirm(`确定清空 ${selectedDate} 的全部记录吗？\n此操作不可撤销。`)) return;
+  setEntry(selectedDate, null);
+  currentRating = 0;
+  loadEntryToForm(selectedDate);
+  renderStars();
+  renderCalSheet();
+  renderHistList();
+  closeAllSheets();
+  toast('🗑 已清空');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(loadAll(), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `每日记录_备份_${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeAllSheets();
+  toast('📥 已导出');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (typeof imported !== 'object') throw new Error();
+      if (confirm('"确定"=合并数据  |  "取消"=替换全部')) {
+        const existing = loadAll();
+        Object.assign(existing, imported);
+        saveAll(existing);
+      } else {
+        saveAll(imported);
+      }
+      closeAllSheets();
+      renderAll();
+      toast('📤 已导入');
+    } catch { alert('导入失败：格式错误'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ═══════════════════════════════════════════
+// Toast
+// ═══════════════════════════════════════════
+function toast(msg) {
+  const old = document.querySelector('.toast');
+  if (old) { old.classList.add('out'); setTimeout(() => old.remove(), 300); }
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 1800);
+}
+
+// ═══════════════════════════════════════════
+// 键盘快捷键
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); manualSave(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goPrevDay(); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); goNextDay(); }
+  if (e.key >= '0' && e.key <= '9' && document.activeElement === document.body) {
+    setRating(e.key === '0' ? 10 : parseInt(e.key));
+  }
+});
+
+// ═══════════════════════════════════════════
+// 注册 Service Worker
+// ═══════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ═══════════════════════════════════════════
+// 启动
+// ═══════════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>

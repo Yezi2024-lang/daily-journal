@@ -1,0 +1,25 @@
+{
+  "name": "每日记录",
+  "short_name": "每日记录",
+  "description": "每天记录高兴的事、不高兴的事、思考和自我评分",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f0eb",
+  "theme_color": "#e8956a",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgY29sb3I9IiNlODk1NmEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIGNvbG9yPSIjZDE3NDNmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3QgeD0iMjQiIHk9IjE2IiB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE2MCIgcng9IjIwIiBmaWxsPSJ1cmwoI2cpIi8+PHJlY3QgeD0iMzYiIHk9IjQ4IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMykiLz48cmVjdCB4PSIzNiIgeT0iNjQiIHdpZHRoPSI5MCIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PHJlY3QgeD0iMzYiIHk9IjgwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMykiLz48cmVjdCB4PSIzNiIgeT0iOTYiIHdpZHRoPSI4MCIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PGNpcmNsZSBjeD0iMTQwIiBjeT0iMTQwIiByPSIyMCIgZmlsbD0iI2YwYjg0MCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxNDAiIHk9IjE0NyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiI+4piEPC90ZXh0Pjwvc3ZnPg==",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgY29sb3I9IiNlODk1NmEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIGNvbG9yPSIjZDE3NDNmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3QgeD0iNjQiIHk9IjQ4IiB3aWR0aD0iMzg0IiBoZWlnaHQ9IjQxNiIgcng9IjQ4IiBmaWxsPSJ1cmwoI2cpIi8+PHJlY3QgeD0iMTA4IiB5PSIxNDQiIHdpZHRoPSIyOTYiIGhlaWdodD0iMTAiIHJ4PSI1IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMykiLz48cmVjdCB4PSIxMDgiIHk9IjE5MiIgd2lkdGg9IjIyMCIgaGVpZ2h0PSIxMCIgcng9IjUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4zKSIvPjxyZWN0IHg9IjEwOCIgeT0iMjQwIiB3aWR0aD0iMjUwIiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PHJlY3QgeD0iMTA4IiB5PSIyODgiIHdpZHRoPSIxOTAiIGhlaWdodD0iMTAiIHJ4PSI1IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMykiLz48Y2lyY2xlIGN4PSIzODAiIGN5PSIzNzYiIHI9IjU2IiBmaWxsPSIjZjBiODQwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iOCIvPjx0ZXh0IHg9IjM4MCIgeT0iMzk2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjY0IiBmaWxsPSIjZmZmIj7imIQ8L3RleHQ+PC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

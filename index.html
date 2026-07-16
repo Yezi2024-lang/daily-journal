@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="每日记录">
+<meta name="theme-color" content="#f5f0eb">
+<meta name="description" content="每天记录高兴的事、不高兴的事、思考和自我评分 — 支持多设备同步">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgY29sb3I9IiNlODk1NmEiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIGNvbG9yPSIjZDE3NDNmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3QgeD0iMjIiIHk9IjE0IiB3aWR0aD0iMTM2IiBoZWlnaHQ9IjE1MiIgcng9IjIwIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iMTMyIiBjeT0iMTMyIiByPSIyMCIgZmlsbD0iI2YwYjg0MCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxMzIiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyNCIgZmlsbD0iI2ZmZiI+4piEPC90ZXh0Pjwvc3ZnPg==">
+<title>每日记录</title>
+
+<!-- 样式 -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- 应用脚本 -->
+<script src="./js/config.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/auth.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════ 顶部日期 ═══════════════ -->
+<div class="date-bar" id="dateBar">
+  <div class="sync-dot" id="syncDot" title="同步状态"></div>
+  <div class="weekday" id="weekdayDisplay"></div>
+  <div class="date" id="dateDisplay"></div>
+  <div class="hint" id="hintDisplay"></div>
+  <div class="nav-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    左右滑动切换日期
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </div>
+</div>
+
+<!-- ═══════════════ 可滚动卡片区 ═══════════════ -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- 高兴 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-happy">😊</div>
+      <div><div class="lbl">今天高兴的事情</div><div class="sub">记录让你嘴角上扬的瞬间</div></div>
+    </div>
+    <textarea id="happyInput" placeholder="写下今天让你感到开心、温暖、满足的事情…"></textarea>
+  </div>
+
+  <!-- 不高兴 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-unhappy">😞</div>
+      <div><div class="lbl">今天最不高兴的事情</div><div class="sub">写出来，也是一种释放</div></div>
+    </div>
+    <textarea id="unhappyInput" placeholder="今天有什么让你沮丧、生气或难过的事…"></textarea>
+  </div>
+
+  <!-- 思考 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-think">💭</div>
+      <div><div class="lbl">我的思考</div><div class="sub">今天的感悟、反思或收获</div></div>
+    </div>
+    <textarea id="thinkInput" placeholder="今天有什么新的想法、感悟或反思…"></textarea>
+  </div>
+
+  <!-- 评分 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico ico-rate">⭐</div>
+      <div><div class="lbl">今日自我评分</div><div class="sub">给自己今天的表现打个分（1-10）</div></div>
+    </div>
+    <div class="rate-row">
+      <div class="stars" id="starRating" style="display:flex;gap:2px;"></div>
+    </div>
+    <div class="rate-row" style="margin-top:4px;">
+      <span class="rate-num" id="ratingNumber">0</span>
+      <span class="rate-label" id="ratingLabel">点击评分</span>
+    </div>
+  </div>
+
+  <!-- 底部留白 -->
+  <div style="height:80px;"></div>
+</div>
+
+<!-- ═══════════════ 浮动保存按钮 ═══════════════ -->
+<button class="fab" id="fabBtn" onclick="manualSave()" aria-label="保存">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+</button>
+
+<!-- ═══════════════ 底部工具栏 ═══════════════ -->
+<div class="bottom-bar">
+  <button class="bbar-btn" onclick="goPrevDay()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    <span>前一天</span>
+  </button>
+  <button class="bbar-btn" onclick="openCalendar()">
+    <span class="bbar-icon">📅</span>
+    <span>日历</span>
+  </button>
+  <button class="bbar-btn" onclick="goToToday()">
+    <span class="bbar-icon">📍</span>
+    <span>今天</span>
+  </button>
+  <button class="bbar-btn" onclick="goNextDay()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    <span>后一天</span>
+  </button>
+  <button class="bbar-btn" onclick="openAccount()">
+    <span class="bbar-icon">👤</span>
+    <span>账户</span>
+  </button>
+  <button class="bbar-btn" onclick="openMenu()">
+    <span class="bbar-icon">⋯</span>
+    <span>更多</span>
+  </button>
+</div>
+
+<!-- ═══════════════ 遮罩 ═══════════════ -->
+<div class="overlay" id="overlay" onclick="closeAllSheets()"></div>
+
+<!-- ═══════════════ 日历面板 ═══════════════ -->
+<div class="sheet" id="calendarSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">📅 选择日期</div>
+  <div class="sheet-body">
+    <div class="cal-header">
+      <span class="cal-month" id="calMonthLabel"></span>
+      <div style="display:flex;gap:6px;">
+        <button class="cal-nav" onclick="calChangeMonth(-1)">◀</button>
+        <button class="cal-nav" onclick="calChangeMonth(1)">▶</button>
+      </div>
+    </div>
+    <div class="cal-wdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <button class="sheet-btn" onclick="goToToday();closeAllSheets();" style="margin-top:14px;justify-content:center;">📍 回到今天</button>
+    <div class="hist-title">📋 最近记录</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ 菜单面板 ═══════════════ -->
+<div class="sheet" id="menuSheet" style="max-height:50vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">⚙️ 更多操作</div>
+  <div class="sheet-body">
+    <button class="sheet-btn" onclick="exportData()"><span class="sico">📥</span> 导出数据备份</button>
+    <button class="sheet-btn" onclick="document.getElementById('importFile').click()"><span class="sico">📤</span> 导入数据恢复</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="sheet-btn danger" onclick="clearTodayViaMenu()"><span class="sico">🗑</span> 清空当日记录</button>
+    <div style="text-align:center;font-size:12px;color:var(--text3);padding:14px 0;">
+      登录账户后可多设备同步<br>未登录时数据保存在浏览器本地
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 账户面板 ═══════════════ -->
+<div class="sheet" id="accountSheet" style="max-height:60vh;">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">👤 账户同步</div>
+  <div class="sheet-body" id="authSheetBody">
+    <div style="text-align:center;padding:20px;color:var(--text3);">加载中…</div>
+  </div>
+</div>
+
+<!-- ═══════════════ 主应用逻辑（依赖前面加载的模块） ═══════════════ -->
+<script src="./js/app.js"></script>
+</body>
+</html>
